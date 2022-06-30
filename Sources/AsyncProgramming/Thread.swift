@@ -33,3 +33,13 @@ func threadPriorityAndCancellation() {
     Thread.sleep(forTimeInterval: 0.1)
     thread.cancel() // This won't stop the block because of sleeping
 }
+
+func threadDictionary() {
+    let thread = Thread {
+        let url = URL(string: "https://apple.com")!
+        _ = response(for: .init(url: url))
+    }
+    
+    thread.threadDictionary["requestId"] = UUID()
+    thread.start()
+}
