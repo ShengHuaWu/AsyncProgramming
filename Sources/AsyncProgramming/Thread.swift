@@ -45,7 +45,7 @@ func threadPriorityAndCancellation() {
     
     thread.start()
     Thread.sleep(forTimeInterval: 0.1)
-    thread.cancel() // This won't stop the block because of sleeping
+    thread.cancel() // This won't stop the block
 }
 
 func threadDictionary() {
