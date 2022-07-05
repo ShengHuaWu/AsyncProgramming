@@ -37,3 +37,36 @@ func operationPriorityAndCancellation() {
     Thread.sleep(forTimeInterval: 0.1)
     operation.cancel() // This won't just cancel the execution block
 }
+
+func operationCoordination() {
+    let queue = OperationQueue()
+    
+    /*
+     A ➡️ B
+    ⬇️    ⬇️
+     C ➡️ D
+     */
+    let operationA = BlockOperation {
+        print("A")
+        Thread.sleep(forTimeInterval: 1)
+    }
+    let operationB = BlockOperation {
+        print("B")
+    }
+    let operationC = BlockOperation {
+        print("C")
+    }
+    let operationD = BlockOperation {
+        print("D")
+    }
+    
+    operationB.addDependency(operationA)
+    operationC.addDependency(operationA)
+    operationD.addDependency(operationB)
+    operationD.addDependency(operationC)
+    
+    queue.addOperation(operationA)
+    queue.addOperation(operationB)
+    queue.addOperation(operationC)
+    queue.addOperation(operationD)
+}
