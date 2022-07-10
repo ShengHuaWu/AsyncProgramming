@@ -2,7 +2,9 @@ import Foundation
 
 // Conclusions:
 //
-// 1. Operation does not provide async non-blocking
+// 1. Operation does not provide async non-blocking.
+//    There is no way to give up our operation’s resources to another operation
+//    if we are waiting for something, such as a delay, timer or network request.
 //
 // 2. Operation coordination does not work well with cancellation
 //

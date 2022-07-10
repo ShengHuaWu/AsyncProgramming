@@ -51,7 +51,7 @@ func threadPriorityAndCancellation() {
 func threadDictionary() {
     let thread = Thread {
         let url = URL(string: "https://apple.com")!
-        _ = response(for: .init(url: url))
+        _ = threadResponse(for: .init(url: url))
     }
     
     thread.threadDictionary["requestId"] = UUID()
