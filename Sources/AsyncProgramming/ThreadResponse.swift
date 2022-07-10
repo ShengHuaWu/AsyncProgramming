@@ -1,20 +1,20 @@
 import Foundation
 
-func makeDatabaseQuery() {
+private func makeDatabaseQuery() {
     let requestId = Thread.current.threadDictionary["requestId"] as! UUID
     print(requestId, "Making database query")
     Thread.sleep(forTimeInterval: 0.5)
     print(requestId, "Finished database query")
 }
 
-func makeNetworkRequest() {
+private func makeNetworkRequest() {
     let requestId = Thread.current.threadDictionary["requestId"] as! UUID
     print(requestId, "Making network request")
     Thread.sleep(forTimeInterval: 0.5)
     print(requestId, "Finished network request")
 }
 
-func response(for request: URLRequest) -> HTTPURLResponse {
+func threadResponse(for request: URLRequest) -> HTTPURLResponse {
     let requestId = Thread.current.threadDictionary["requestId"] as! UUID
     
     let start = Date()
