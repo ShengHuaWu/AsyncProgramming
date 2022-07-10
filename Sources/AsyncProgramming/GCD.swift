@@ -1,5 +1,18 @@
 import Foundation
 
+// Conclusions:
+//
+// 1. In order to be able to split off new child execution contexts that inherit the specifics,
+//    we need to have access to the parent queue.
+//
+// 2. There is no way to have the cancellation of one work item
+//    to trick down to “child” work items created.
+//
+// 3. GCD has the problem of accidentally exploding the number of threads in use
+//    if you are not careful
+//
+// 4. GCD does not give us the tools to allow cooperating with other work items. 
+
 func gcdBasics() {
     // A serial queue will spawn only one thread
     let queue = DispatchQueue(label: "basics", attributes: .concurrent)
@@ -11,7 +24,7 @@ func gcdBasics() {
     }
 }
 
-func gcdNonblocking() {
+func gcdScheduleNonblocking() {
     // Dispatch queues are capable of scheduling work to be performed in the future,
     // all without blocking the current thread.
     // The scheduling happens at a deeper level with the OS
@@ -88,4 +101,56 @@ func gcdTarget() {
             print("queue2", "date", DispatchQueue.getSpecific(key: dateKey) ?? "nil")
         }
     }
+}
+
+func gcdExpensiveness() {
+    // This could still cause thread explosion
+    for n in 0 ..< workCount {
+        DispatchQueue(label: "queue-\(n)").async {
+            print(Thread.current)
+            while true {}
+        }
+    }
+}
+
+func gcdBlocking() {
+    // Like operation queues,
+    // a small number of threads are created,
+    // but then they are tied up forever
+    // so that no other work items are getting an opportunity to execute.
+    let queue = DispatchQueue(label: "concurrent-queue", attributes: .concurrent)
+    for n in 0 ..< workCount {
+        queue.async {
+            print(n, Thread.current)
+            while true {}
+        }
+    }
+}
+
+func gcdDataRacing() {
+    class Counter {
+        let queue = DispatchQueue(label: "counter", attributes: .concurrent)
+        var count = 0
+        func increment() {
+            // Use `barrier` to wait until a queue has executed all of its work
+            // before it executes its next unit of work.
+            // It's similar to lock.
+            self.queue.sync(flags: .barrier) {
+                self.count += 1
+            }
+        }
+    }
+    
+    let counter = Counter()
+    
+    let queue = DispatchQueue(label: "concurrent-queue", attributes: .concurrent)
+    
+    for _ in 0 ..< workCount {
+        queue.async {
+            counter.increment()
+        }
+    }
+    
+    Thread.sleep(forTimeInterval: 1)
+    print("counter.count", counter.count)
 }
