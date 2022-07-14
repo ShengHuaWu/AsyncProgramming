@@ -47,6 +47,9 @@ func gcdPriorityAndCancellation() {
         defer { item = nil }
         
         let start = Date()
+        
+        // This will be printed after sleeping,
+        // even though item has been cancelled already
         defer { print("Finished in", Date().timeIntervalSince(start)) }
         
         Thread.sleep(forTimeInterval: 1)
@@ -63,7 +66,7 @@ func gcdPriorityAndCancellation() {
     
     queue.async(execute: item)
     
-    Thread.sleep(forTimeInterval: 0.5)
+    Thread.sleep(forTimeInterval: 0.3)
     item.cancel()
 }
 

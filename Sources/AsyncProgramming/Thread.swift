@@ -27,6 +27,9 @@ func threadPriorityAndCancellation() {
     // The block argument of initializer is a lazy operation
     let thread = Thread {
         let start = Date()
+        
+        // This will be printed after sleeping,
+        // even though thread has been cancelled already
         defer { print("Finished in", Date().timeIntervalSince(start)) }
         
         Thread.sleep(forTimeInterval: 1)
