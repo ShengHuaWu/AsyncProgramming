@@ -116,3 +116,55 @@ func taskPriorityAndCancellation() {
       print(task ?? "nil") // nil
     }
 }
+
+enum RequestData {
+    @TaskLocal static var requestId: UUID!
+    @TaskLocal static var startDate: Date!
+}
+
+// So it seems that task local values permeate deeply throughout the system.
+// They not only cross from one asynchronous context to another,
+// but they even travel to new tasks spun up inside an existing task context.
+func taskLocals() {
+    enum MyLocals {
+        @TaskLocal static var id: Int!
+    }
+    
+    @Sendable func doSomethingAsync() async {
+      print("doSomethingAsync:", MyLocals.id!)
+    }
+    
+    print("before:", MyLocals.id ?? "nil")
+    MyLocals.$id.withValue(42) {
+        print("withValue:", MyLocals.id!)
+        
+        // Whenever you start a new task it automatically inherits
+        // all of the task locals available at that moment
+        Task {
+            
+            // We can also nest withValue in order to create even smaller
+            // and more focused scoped changes to task locals
+            MyLocals.$id.withValue(1729) {
+                Task {
+                    try await Task.sleep(nanoseconds: 2 * NSEC_PER_SEC)
+                    print("Task 2:", MyLocals.id!)
+                }
+            }
+            
+            try await Task.sleep(nanoseconds: NSEC_PER_SEC)
+            Task {
+                print("Task:", MyLocals.id!)
+                await doSomethingAsync()
+            }
+        }
+    }
+    print("after:", MyLocals.id ?? "nil")
+    
+    RequestData.$requestId.withValue(UUID()) {
+        RequestData.$startDate.withValue(Date()) {
+            Task {
+                try await taskResponse(for: .init(url: .init(string: "http://pointfree.co")!))
+            }
+        }
+    }
+}
