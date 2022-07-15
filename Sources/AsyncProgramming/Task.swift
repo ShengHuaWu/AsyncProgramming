@@ -168,3 +168,32 @@ func taskLocals() {
         }
     }
 }
+
+func taskCooperation() {
+    // This loop is non-blocking because
+    // Apple ships a whole bunch of other non-blocking APIs
+    // besides sleeping and network requests,
+    // such as accessing the file system, asking for location permissions, and more
+    for n in 0 ..< workCount {
+        Task {
+            let (data, _) = try await URLSession.shared.data(from: .init(string: "http://ipv4.download.thinkbroadband.com/1MB.zip")!) // Non-blocking
+            print(n, data.count, Thread.current)
+        }
+    }
+    
+    // This loop is blocking if we do NOT use `yield` function
+    for _ in 0 ..< workCount {
+        Task {
+            while true {
+                // It allows you to perform intense CPU work in a thread,
+                // while also not holding up an entire thread from the cooperative pool.
+                await Task.yield()
+            }
+        }
+    }
+    
+    Task {
+        print("Starting prime task")
+        nthPrime(10_000)
+    }
+}

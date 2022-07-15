@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "AsyncProgramming",
-    platforms: [.macOS(.v10_15)],
+    platforms: [.macOS(.v12)],
     dependencies: [],
     targets: [
         .executableTarget(
