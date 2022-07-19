@@ -9,7 +9,13 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "AsyncProgramming",
-            dependencies: []
+            dependencies: [] /*,
+            // This will trigger extra concurrency warnings
+            swiftSettings: [
+                .unsafeFlags([
+                    "-Xfrontend", "-warn-concurrency",
+                ]),
+            ] */
         ),
         .testTarget(
             name: "AsyncProgrammingTests",
